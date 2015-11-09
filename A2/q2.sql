@@ -15,7 +15,7 @@ SELECT r.artist_id, a.sales
 FROM Album a, Artist r, AllCollabs c
 WHERE a.artist_id = r.artist_id AND a.album_id <> c.album_id;
 
-SELECT a.name AS artists, c.avg_sale AS avg_collab_sales
+SELECT DISTINCT a.name AS artists, c.avg_sale AS avg_collab_sales
 FROM CollabSales c, Artist a
 WHERE c.artist_id = a.artist_id 
 	AND c.avg_sales > ANY 
