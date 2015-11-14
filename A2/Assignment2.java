@@ -84,6 +84,23 @@ public class Assignment2 {
 	 * @param artist  the name of the artist to find collaborators for
 	 * @return        a sorted list of artist names
 	 */
+	queryString = "Sth we need to work on";
+    pStatement = conn.prepareStatement(queryString);
+    rs = pStatement.executeQuery();
+
+	int numcols = rs.getMetaData().getColumnCount();
+    List<String> answer = new ArrayList<>(numcols); 
+    
+    while (rs.next()) {
+    int i = 1;
+    while (i <= numcols) {  // don't skip the last column, use <=
+        answer.add(rs.getString(i++));
+    }
+
+    return answer
+}
+	
+
 	public ArrayList<String> findCollaborators(String artist) {
 		
 		return null;
