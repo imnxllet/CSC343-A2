@@ -67,9 +67,22 @@ public class Assignment2 {
 	 */
 	public ArrayList<String> findArtistsInGenre(String genre) {
 
-		return null;
-	}
+		queryString = "Sth we need to work on";
+		pStatement = conn.prepareStatement(queryString);
+		rs = pStatement.executeQuery();
 
+		int numcols = rs.getMetaData().getColumnCount();
+		List<String> answer = new ArrayList<>(numcols); 
+	    
+		while (rs.next()) {
+	    		int i = 1;
+	    		while (i <= numcols) {  // don't skip the last column, use <=
+				answer.add(rs.getString(i++));
+	    	}
+
+		return answer
+	}
+	
 	/**
 	 * Returns a sorted list of the names of all collaborators
 	 * (either as a main artist or guest) for a given artist.  
@@ -84,26 +97,23 @@ public class Assignment2 {
 	 * @param artist  the name of the artist to find collaborators for
 	 * @return        a sorted list of artist names
 	 */
-	queryString = "Sth we need to work on";
-    pStatement = conn.prepareStatement(queryString);
-    rs = pStatement.executeQuery();
-
-	int numcols = rs.getMetaData().getColumnCount();
-    List<String> answer = new ArrayList<>(numcols); 
-    
-    while (rs.next()) {
-    int i = 1;
-    while (i <= numcols) {  // don't skip the last column, use <=
-        answer.add(rs.getString(i++));
-    }
-
-    return answer
-}
-	
-
 	public ArrayList<String> findCollaborators(String artist) {
 		
-		return null;
+		String queryString = "SELECT a1.name AS name1, a2.name AS name2 FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name = '" + artist + "' OR a2.name = '" + artist + "')";
+		PreparedStatement ps = connection.prepareStatement(queryString);
+		ResultSet rs = ps.executeQuery();
+
+		List<String> answer = new ArrayList<>(); 
+
+		while (rs.next()) {
+			String name = rs.getString("name1");
+			if (name == artist)
+				name = rs.getString("name2");
+			answer.add(name);
+		}
+
+		Collections.sort(answer);
+		return answer;
 	}
 
 
@@ -143,7 +153,34 @@ public class Assignment2 {
 	 */
 	public ArrayList<String> findAcquaintances(String artist1, String artist2) {
 
-		return null;
+		String q1 = "CREATE VIEW CollabA1 AS SELECT a1.name AS name1, a2.name AS name2 FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name = '" + artist1 + "' OR a2.name = '" + artist1 + "')";
+		String q2 = "CREATE VIEW WriterA1 AS SELECT a2.name FROM Artist a1, Artist a2, Album m, Song s, BelongsToAlbum b WHERE a1.name = '" + artist1 + "' AND a1.artist_id = m.artist_id AND m.album_id = b.album_id AND b.song_id = s.song_id AND a2.artist_id = s.songwriter_id";
+		String q3 = "CREATE VIEW AcqA1 AS (SELECT c.name1 AS name FROM CollabA1 c WHERE c.name1 <> '" + artist1 + "') UNION (SELECT c.name2 AS name FROM CollabA1 c WHERE c.name2 <> '" + artist1 + "') UNION (SELECT * FROM WriterA1)";
+
+		String q4 = "CREATE VIEW CollabA2 AS SELECT a1.name AS name1, a2.name AS name2 FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name = '" + artist2 + "' OR a2.name = '" + artist2 + "')";
+		String q5 = "CREATE VIEW WriterA2 AS SELECT a2.name FROM Artist a1, Artist a2, Album m, Song s, BelongsToAlbum b WHERE a1.name = '" + artist2 + "' AND a1.artist_id = m.artist_id AND m.album_id = b.album_id AND b.song_id = s.song_id AND a2.artist_id = s.songwriter_id";
+		String q6 = "CREATE VIEW AcqA2 AS (SELECT c.name1 AS name FROM CollabA1 c WHERE c.name1 <> '" + artist2 + "') UNION (SELECT c.name2 AS name FROM CollabA1 c WHERE c.name2 <> '" + artist2 + "') UNION (SELECT * FROM WriterA1)";
+
+		String q7 = "(SELECT * FROM AcqA1) UNION (SELECT * FROM AcqA2)";
+
+		Statement st = connection.createStatement();
+		st.executeUpdate(q1);
+		st.executeUpdate(q2);
+		st.executeUpdate(q3);
+		st.executeUpdate(q4);
+		st.executeUpdate(q5);
+		st.executeUpdate(q6);
+		ResultSet rs = st.executeQuery(q7);
+
+		List<String> answer = new ArrayList<>(); 
+
+		while (rs.next()) {
+			String name = rs.getString("name");
+			answer.add(name);
+		}
+		
+		Collections.sort(answer);
+		return answer;
 	}
 	
 	

@@ -3,7 +3,7 @@ SET search_path TO artistdb;
 CREATE VIEW CanadianArtists AS
 SELECT a.artist_id, a.name, a.nationality
 FROM Artist a
-WHERE nationality="Canada";
+WHERE nationality= 'Canada';
 
 CREATE VIEW PublishedAlbums AS
 SELECT a.album_id, a.artist_id, r.country
@@ -22,8 +22,8 @@ WHERE c.artist_id = a.artist_id AND NOT EXISTS
 	 FROM PublishedAlbums p
 	 WHERE p.album_id = a.album_id);
 
-SELECT DISTINCT c.name AS artist_name
+SELECT DISTINCT i.name AS artist_name
 FROM StartedIndie i, PublishedAlbums p
-WHERE i.artist_id = p.artist_id AND r.country = "US"
-ORDER BY c.name;
+WHERE i.artist_id = p.artist_id AND p.country = 'America'
+ORDER BY i.name;
 
