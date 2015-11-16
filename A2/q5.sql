@@ -1,3 +1,5 @@
+SET search_path TO artistdb;
+
 Select distinct Artist.name, self_album.title
 from Artist, 
 (select Album.title, Album.artist_id from Album, BelongsToAlbum, Song where 

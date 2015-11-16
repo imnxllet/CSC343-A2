@@ -1,3 +1,5 @@
+SET search_path TO artistdb;
+
 Select name, nationality
 from Artist
 where EXTRACT(YEAR from Artist.birthdate) = (

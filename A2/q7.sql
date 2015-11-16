@@ -1,3 +1,5 @@
+SET search_path TO artistdb;
+
 select Song.title, Album.year, Artist.name
 from Song, Album, Artist,
 (

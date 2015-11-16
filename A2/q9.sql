@@ -1,3 +1,4 @@
+SET search_path TO artistdb;
 
 update WasInBand set end_year = 2014
 where artist_id = 

@@ -1,3 +1,5 @@
+SET search_path TO artistdb;
+
 Select label_name, year, sum(sales)
 from RecordLabel, Album, ProducedBy
 where ProducedBy.album_id = Album.album_id and ProducedBy.label_id = RecordLabel.label_id
