@@ -73,10 +73,12 @@ class Assignment2 {
         ArrayList<String> answer = new ArrayList<>(); 
 
 		try{
-			queryString = "SET search_path TO artistdb; select name from Artist, Album, Genre where Artist.artist_id = Album.artist_id and Album.genre_id = Genre.genre_id and Genre.genre =  " + genre + ";";
+			String set_path = "SET search_path TO artistdb;";
+			queryString = "select name from Artist, Album, Genre where Artist.artist_id = Album.artist_id and Album.genre_id = Genre.genre_id and Genre.genre =  " + genre + ";";
 		    pStatement = connection.createStatement();
+            pStatement.execute(set_path);
 		    rs = pStatement.executeQuery(queryString);
-
+            
 			int numcols = rs.getMetaData().getColumnCount();
 		    
 		    while (rs.next()) {
@@ -115,8 +117,10 @@ class Assignment2 {
 		ArrayList<String> answer = new ArrayList<>();
 		String name;
         try{
-			queryString = "SET search_path TO artistdb; SELECT a1.name FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name =" + artist + "OR a2.name = " + artist+ "');";
+        	String set_path = "SET search_path TO artistdb;";
+			queryString = "SELECT a1.name FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name =" + artist + "OR a2.name = " + artist+ "');";
 			ps = connection.createStatement();
+			ps.execute(set_path);
 			rs = ps.executeQuery(queryString);
 
 			while (rs.next()) {
@@ -160,8 +164,10 @@ class Assignment2 {
 		int numcols;
         
         try{
+        	String set_path = "SET search_path TO artistdb;";
 			queryString = "SET search_path TO artistdb; select name from Artist, (select songwriter_id from Song, BelongsToAlbum, Album, Artist where Song.song_id = BelongsToAlbum.song_id and BelongsToAlbum.album_id = Album.album_id and Album.artist_id = Artist.artist_id and Song.songwriter_id != Album.artist_id and Artist.name = " + artist + ") AS writerwhere Artist.artist_id = writer.songwriter_id;";
 		    pStatement = connection.createStatement();
+		    pStatement.execute(set_path);
 		    rs = pStatement.executeQuery(queryString);
 
 			numcols = rs.getMetaData().getColumnCount();
@@ -198,7 +204,7 @@ class Assignment2 {
 	public ArrayList<String> findAcquaintances(String artist1, String artist2) {
 	    ArrayList<String> answer = new ArrayList<>();
 		try{	
-
+            String set_path = "SET search_path TO artistdb;";
 			String q1 = "SET search_path TO artistdb; CREATE VIEW CollabA1 AS SELECT a1.name AS name1, a2.name AS name2 FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name = " + artist1 +  "OR a2.name = "+ artist1 + ");";
 	        String q2 = "SET search_path TO artistdb; CREATE VIEW WriterA1 AS SELECT a2.name FROM Artist a1, Artist a2, Album m, Song s, BelongsToAlbum b WHERE a1.name =" + artist1 + " AND a1.artist_id = m.artist_id AND m.album_id = b.album_id AND b.song_id = s.song_id AND a2.artist_id = s.songwriter_id;";
 			String q3 = "SET search_path TO artistdb; CREATE VIEW AcqA1 AS (SELECT c.name1 AS name FROM CollabA1 c WHERE c.name1 <> " + artist1 + ") UNION (SELECT c.name2 AS name FROM CollabA1 c WHERE c.name2 <> "+ artist1 +") UNION (SELECT * FROM WriterA1);";
@@ -210,6 +216,7 @@ class Assignment2 {
 
 
 			Statement st = connection.createStatement();
+			st.execute(set_path);	
 			st.executeUpdate(q1);
 			st.executeUpdate(q2);
 			st.executeUpdate(q3);
