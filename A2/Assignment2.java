@@ -118,18 +118,19 @@ class Assignment2 {
 		String name;
         try{
         	String set_path = "SET search_path TO artistdb;";
-			queryString = "SELECT a1.name FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name = " + artist + " OR a2.name = " + artist+ "');";
+			queryString = "SELECT a1.name FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name = '" + artist + "' OR a2.name = '" + artist+ "');";
 			ps = connection.createStatement();
 			ps.execute(set_path);
 			rs = ps.executeQuery(queryString);
 
-			while (rs.next()) {
-				name = rs.getString("name1");
-				if (name == artist){
-					name = rs.getString("name2");
-				}
-				answer.add(name);
-			}
+			int numcols = rs.getMetaData().getColumnCount();
+		    
+		    while (rs.next()) {
+		        int i = 1;
+		        while (i <= numcols) {  // don't skip the last column, use <=
+		            answer.add(rs.getString(i++));
+		        }
+		    }
 
 			Collections.sort(answer);
 			
@@ -165,7 +166,7 @@ class Assignment2 {
         
         try{
         	String set_path = "SET search_path TO artistdb;";
-			queryString = "SET search_path TO artistdb; select name from Artist, (select songwriter_id from Song, BelongsToAlbum, Album, Artist where Song.song_id = BelongsToAlbum.song_id and BelongsToAlbum.album_id = Album.album_id and Album.artist_id = Artist.artist_id and Song.songwriter_id != Album.artist_id and Artist.name = " + artist + ") AS writerwhere Artist.artist_id = writer.songwriter_id;";
+			queryString = "select name from Artist, (select songwriter_id from Song, BelongsToAlbum, Album, Artist where Song.song_id = BelongsToAlbum.song_id and BelongsToAlbum.album_id = Album.album_id and Album.artist_id = Artist.artist_id and Song.songwriter_id != Album.artist_id and Artist.name = '" + artist + "') AS writer where Artist.artist_id = writer.songwriter_id;";
 		    pStatement = connection.createStatement();
 		    pStatement.execute(set_path);
 		    rs = pStatement.executeQuery(queryString);
@@ -205,14 +206,14 @@ class Assignment2 {
 	    ArrayList<String> answer = new ArrayList<>();
 		try{	
             String set_path = "SET search_path TO artistdb;";
-			String q1 = "SET search_path TO artistdb; CREATE VIEW CollabA1 AS SELECT a1.name AS name1, a2.name AS name2 FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name = " + artist1 +  " OR a2.name = "+ artist1 + ");";
-	        String q2 = "SET search_path TO artistdb; CREATE VIEW WriterA1 AS SELECT a2.name FROM Artist a1, Artist a2, Album m, Song s, BelongsToAlbum b WHERE a1.name =" + artist1 + " AND a1.artist_id = m.artist_id AND m.album_id = b.album_id AND b.song_id = s.song_id AND a2.artist_id = s.songwriter_id;";
-			String q3 = "SET search_path TO artistdb; CREATE VIEW AcqA1 AS (SELECT c.name1 AS name FROM CollabA1 c WHERE c.name1 <> " + artist1 + ") UNION (SELECT c.name2 AS name FROM CollabA1 c WHERE c.name2 <> "+ artist1 +") UNION (SELECT * FROM WriterA1);";
+			String q1 = "CREATE VIEW CollabA1 AS SELECT a1.name AS name1, a2.name AS name2 FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name = '" + artist1 +  "' OR a2.name = '"+ artist1 + "');";
+	        String q2 = "CREATE VIEW WriterA1 AS SELECT a2.name FROM Artist a1, Artist a2, Album m, Song s, BelongsToAlbum b WHERE a1.name = '" + artist1 + "' AND a1.artist_id = m.artist_id AND m.album_id = b.album_id AND b.song_id = s.song_id AND a2.artist_id = s.songwriter_id;";
+			String q3 = "CREATE VIEW AcqA1 AS (SELECT c.name1 AS name FROM CollabA1 c WHERE c.name1 <> '" + artist1 + "') UNION (SELECT c.name2 AS name FROM CollabA1 c WHERE c.name2 <> '"+ artist1 +"') UNION (SELECT * FROM WriterA1);";
 
-			String q4 = "SET search_path TO artistdb; CREATE VIEW CollabA2 AS SELECT a1.name AS name1, a2.name AS name2 FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name = " + artist2 +  " OR a2.name = " + artist2 + ");" ;
-			String q5 = "SET search_path TO artistdb; CREATE VIEW WriterA2 AS SELECT a2.name FROM Artist a1, Artist a2, Album m, Song s, BelongsToAlbum b WHERE a1.name = " + artist2 + " AND a1.artist_id = m.artist_id AND m.album_id = b.album_id AND b.song_id = s.song_id AND a2.artist_id = s.songwriter_id;";
-			String q6 = "SET search_path TO artistdb; CREATE VIEW AcqA2 AS (SELECT c.name1 AS name FROM CollabA1 c WHERE c.name1 <> "+ artist2 + ") UNION (SELECT c.name2 AS name FROM CollabA1 c WHERE c.name2 <> "+ artist2 + ") UNION (SELECT * FROM WriterA1);";
-			String q7 = "SET search_path TO artistdb; (SELECT * FROM AcqA1) INTERSECT (SELECT * FROM AcqA2);";
+			String q4 = "CREATE VIEW CollabA2 AS SELECT a1.name AS name1, a2.name AS name2 FROM Collaboration c, Artist a1, Artist a2 WHERE a1.artist_id = c.artist1 AND a2.artist_id = c.artist2 AND (a1.name = '" + artist2 +  "' OR a2.name = '" + artist2 + "');" ;
+			String q5 = "CREATE VIEW WriterA2 AS SELECT a2.name FROM Artist a1, Artist a2, Album m, Song s, BelongsToAlbum b WHERE a1.name = '" + artist2 + "' AND a1.artist_id = m.artist_id AND m.album_id = b.album_id AND b.song_id = s.song_id AND a2.artist_id = s.songwriter_id;";
+			String q6 = "CREATE VIEW AcqA2 AS (SELECT c.name1 AS name FROM CollabA1 c WHERE c.name1 <> '"+ artist2 + "') UNION (SELECT c.name2 AS name FROM CollabA1 c WHERE c.name2 <> '"+ artist2 + "') UNION (SELECT * FROM WriterA1);";
+			String q7 = "(SELECT * FROM AcqA1) INTERSECT (SELECT * FROM AcqA2);";
 
 
 			Statement st = connection.createStatement();
